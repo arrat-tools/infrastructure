@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: ARRAT Step Function Stack
+
+Parameters:
+  InstanceId: 
+    Type: String 
+    Description: ARRAT GPU instance
+    
+Resources: 
+
+  ARRATStateMachine: 
+    Type: AWS::Serverless::StateMachine 
+    Properties: 
+      DefinitionUri: ../statemachine/arrat.asl.json 
+      DefinitionSubstitutions:
+        ArratInstanceId: !Ref InstanceId
+      Policies:
+        - LambdaInvokePolicy: {FunctionName: !Ref ParseJsonFunction}
+
+
+      
+Outputs: 
+
+  ARRATStateMachineArn: 
+    Description: ARRAT state machine 
+    Value: !Ref ARRATStateMachine
