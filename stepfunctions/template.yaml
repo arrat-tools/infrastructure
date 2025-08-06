@@ -6,8 +6,12 @@ Parameters:
   InstanceId: 
     Type: String 
     Description: ARRAT GPU instance
+    Default: i-0b0b76f95e728f27f 
     
 Resources: 
+
+  ARRATBucket:
+    Type: AWS::S3::Bucket
 
   ARRATStateMachine: 
     Type: AWS::Serverless::StateMachine 
@@ -15,11 +19,42 @@ Resources:
       DefinitionUri: ../statemachine/arrat.asl.json 
       DefinitionSubstitutions:
         ArratInstanceId: !Ref InstanceId
+      Role: !Ref SSMStepFunctionRole
+
+  SSMStepFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
       Policies:
-        - LambdaInvokePolicy: {FunctionName: !Ref ParseJsonFunction}
+        - Statement:
+          - Effect: Allow
+            Action:
+            - 'xray:PutTraceSegments'
+            - 'xray:PutTelemetryRecords'
+            - 'xray:GetSamplingRules'
+            - 'xray:GetSamplingTargets'
+            Resource:
+            - '*'
+        - Statement:
+          - Effect: Allow
+            Action:
+            - 'ssm:StartAutomationExecution'
+            Resource:
+            - '*'
+        - Statement:
+          - Effect: Allow
+            Action:
+            - 's3:PutObject'
+            Resource:
+            - !GetAtt ARRATBucket.Arn
+      RoleName: SSMStepFunctionRole      
 
-
-      
 Outputs: 
 
   ARRATStateMachineArn: 
