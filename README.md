@@ -24,9 +24,9 @@ aws cloudformation deploy --template-file template.yml --stack-name arrat-ec2 --
 
 Option 2: Deploy using AWS Console
 
-1: Log into AWS and go to the CloudFormation Service
+1: Log into AWS and go to the CloudFormation Service and navigate to Stacks
 
-2: Select Upload a template file and click "Choose file" and select the ec2 template.yaml file from your local machine
+2: Select Create stack With new resources, ensure that Choose and existing template is selected, select Upload a template file and click "Choose file" and select the ec2 template.yaml file from your local machine
 
 3: Click Next, give the stack an appropriate name, such as "arrat-ec2" and provide the required parameters
     - AMI ID
@@ -35,9 +35,11 @@ Option 2: Deploy using AWS Console
     - Subnet ID
     - Key Pair Name 
 
-4: Click Next and acknowledge and click Create Stack
+4: Click Next, accept the defaults and acknowledgements and click Next
 
-5: After a few minutes, the stack will be created.  Navigate to the EC2 service, Instances, and note the instance id. This will be needed to deploy the pipeline.
+5: Review the settings and click Submit
+
+6: After a few minutes, the stack will be created.  Navigate to the EC2 service, Instances, and note the instance id. This will be needed to deploy the pipeline.
 
 ## Deploying the Pipeline
 
@@ -55,13 +57,15 @@ aws cloudformation deploy --template-file template.yml --stack-name arrat-ec2 --
 
 Option 2: Deploy using AWS Console
 
-1: Log into AWS and go to the CloudFormation Service
+1: Log into AWS and go to the CloudFormation Service and navigate to Stacks
 
-2: Select Upload a template file and click "Choose file" and select the stepfunctions template.yaml file from your local machine
+2: Select Create stack With new resources, ensure that Choose and existing template is selected, select Upload a template file and click "Choose file" and select the stepfunctions template.yaml file from your local machine
 
 3: Click Next, give the stack an appropriate name, such as "ARRAT-Pipeline" and provide the required parameters
     - Instance ID
 
-4: Click Next and acknowledge and click Create Stack
+4: Click Next, accept the defaults and acknowledgements and click Next
 
-5: After a few minutes, the stack will be created.  Navigate to the Step Functions service, select the newly created state machine and you can view it's details.  You are now ready to execute the ARRAT pipeline. 
+5: Review the settings and click Submit
+
+6: After a few minutes, the stack will be created.  Navigate to the Step Functions service, select the newly created state machine and you can view it's details.  You are now ready to execute the ARRAT pipeline. 
