@@ -6,23 +6,19 @@ Parameters:
   AmiId:
     Type: String 
     Description: ami id 
-    Default: ami-0481a2c9118bf0a59
+    Default: ami-08a3b3d19e53d61e3
   SecurityGroupId: 
     Type: String
     Description: security group id 
-    Default: sg-0468f4113a4e36d34 
   VPCId:
     Type: String
     Description: vpc id
-    Default: vpc-00465e9c97c4937fd
   VPCSubnetId: 
     Type: String 
     Description: vpc subnet id 
-    Default: subnet-07498d8504facc19a
   KeyPairName:
     Type: String 
     Description: ec2 key pair 
-    Default: i70_tac_keypair
 
 Resources:
 
@@ -54,7 +50,7 @@ Resources:
       SubnetId: !Ref VPCSubnetId
       BlockDeviceMappings:
       -
-        DeviceName: "/dev/sda"
+        DeviceName: "/dev/sda1"
         Ebs:
           VolumeSize: 600
           VolumeType: gp3
@@ -69,20 +65,4 @@ Resources:
       Roles: 
         - !Ref InstanceRole
 
-  # InstallSSMAgentAssociation:
-  #   Type: AWS::SSM::Association
-  #   Properties:
-  #     Name: AWS-ConfigureAWSPackage
-  #     Targets:
-  #       - Key: tag:Environment
-  #         Values:
-  #           - Production
-  #     Parameters:
-  #       action:
-  #         - Install
-  #       source:
-  #         - https://s3.amazonaws.com/amazon-ssm-us-east-1/ssm-agent/
-  #       packageName:
-  #         - AmazonSSMAgent
-  #     ScheduleExpression: cron(0 0 ? * * *) # Run daily
 
