@@ -57,6 +57,13 @@ Resources:
       Tags:
       - Key: Name
         Value: GPU ARRAT
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get purge --auto-remove python3-pip
+          apt-get update
+          apt-get -y install python3-pip
+          chsh -s /bin/bash bscholer
 
   InstanceProfile: 
     Type: AWS::IAM::InstanceProfile 
@@ -64,5 +71,3 @@ Resources:
       Path: "/"
       Roles: 
         - !Ref InstanceRole
-
-
