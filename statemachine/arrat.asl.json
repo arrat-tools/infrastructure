@@ -1,626 +1,654 @@
 {
-    "Comment": "lane lines and sign processing state machine",
-    "StartAt": "PrepareData",
-    "States": {
-        "PrepareData": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-            "Parameters": {
-                "DocumentName": "SfnRunCommandByInstanceIds",
-                "Parameters": {
-                    "InstanceIds": [
-                        "${ArratInstanceId}"
-                    ],
-                    "taskToken.$": "States.Array($$.Task.Token)",
-                    "workingDirectory": [
-                        "/home/ssm-user/"
-                    ],
-                    "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'rm -rf ARRAT_060225', 'mkdir ARRAT_060225', 'cd ARRAT_060225', 'mkdir code', 'mkdir routes', 'aws s3 sync s3://i70-code-files/ARRAT_060225/code/ ./code', 'aws s3 cp s3://i70-code-files/ARRAT_060225/requirements.txt requirements.txt', 'aws s3 sync s3://i70-route-data/routes/ ./routes', 'cd ~/ARRAT_060225', 'pip3 install -r requirements.txt', States.Format('aws s3 cp s3://i70-session-input-data/{}/inputs.json inputs.json', $.session), 'aws s3 cp s3://i70-code-files/lanelines/Makefile ~/clrnet_6625/Makefile', 'aws s3 cp s3://i70-code-files/lanelines/dockerfile ~/clrnet_6625/dockerfile', 'aws s3 cp s3://i70-code-files/dla34.py ~/clrnet_6625/clrnet/clrnet/models/backbones/dla34.py', 'EOF')",
-                    "executionTimeout": [
-                        "10800"
-                    ],
-                    "deliveryTimeout": [
-                        "30"
-                    ],
-                    "shell": [
-                        "Shell"
-                    ]
-                }
-            },
-            "ResultPath": null,
-            "Next": "ProcessUnits"
-        },
-        "ProcessUnits": {
-            "Type": "Map",
-            "InputPath": "$",
-            "MaxConcurrency": 1,
-            "ItemProcessor": {
-                "ProcessorConfig": {
-                    "Mode": "INLINE"
-                },
-                "StartAt": "LaneLinesLoadUnitData",
-                "States": {
-                    "LaneLinesLoadUnitData": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ARRAT_060225', States.Format('rm -rf {}', $.unit), States.Format('mkdir {}', $.unit), States.Format('aws s3 sync s3://i70-session-input-data/{}/{}/ ./{}', $.session, $.unit, $.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "LaneLinesStep1"
-                    },
-                    "LaneLinesStep1": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('python3 code/step1_downsample_units.py --datadir {}', $.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "LaneLinesStep2Put"
-                    },
-                    "LaneLinesStep2Put": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('python3 code/step2_run_clrnet.py --datadir {}  --put 1 --get 0', $.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "LaneLinesRunCLRNET"
-                    },
-                    "LaneLinesRunCLRNET": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF','cd ~/clrnet_6625','aws s3 cp s3://i70-code-files/lanelines/Makefile Makefile','aws s3 cp s3://i70-code-files/lanelines/dockerfile dockerfile','aws s3 cp s3://i70-code-files/dla34.py ~/clrnet_6625/clrnet/clrnet/models/backbones/dla34.py','make', 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "LaneLinesStep2Get"
-                    },
-                    "LaneLinesStep2Get": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('python3 code/step2_run_clrnet.py --datadir {} --put 0 --get 1',$.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "LaneLinesStep3"
-                    },
-                    "LaneLinesStep3": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225',States.Format('python3 code/step3_ego_lanelines.py --datadir {}',$.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "LaneLinesStep4"
-                    },
-                    "LaneLinesStep4": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('python3 code/step4_ego_curvature.py --datadir {}',$.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "LaneLinesStep5"
-                    },
-                    "LaneLinesStep5": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('python3 code/step5_extract_events.py --datadir {}',$.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "End": true
-                    }
-                }
-            },
-            "Next": "LaneLinesStep6",
-            "ResultPath": null,
-            "ItemsPath": "$.units"
-        },
-        "LaneLinesStep6": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-            "Parameters": {
-                "DocumentName": "SfnRunCommandByInstanceIds",
-                "Parameters": {
-                    "InstanceIds": [
-                        "${ArratInstanceId}"
-                    ],
-                    "taskToken.$": "States.Array($$.Task.Token)",
-                    "workingDirectory": [
-                        "/home/ssm-user/"
-                    ],
-                    "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', 'python3 code/step6_segmentation.py --datadir ./', 'EOF')",
-                    "executionTimeout": [
-                        "10800"
-                    ],
-                    "deliveryTimeout": [
-                        "30"
-                    ],
-                    "shell": [
-                        "Shell"
-                    ]
-                }
-            },
-            "ResultPath": null,
-            "Next": "LaneLinesStep7"
-        },
-        "LaneLinesStep7": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-            "Parameters": {
-                "DocumentName": "SfnRunCommandByInstanceIds",
-                "Parameters": {
-                    "InstanceIds": [
-                        "${ArratInstanceId}"
-                    ],
-                    "taskToken.$": "States.Array($$.Task.Token)",
-                    "workingDirectory": [
-                        "/home/ssm-user/"
-                    ],
-                    "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', 'python3 code/step7_line_scoring.py --datadir ./', 'EOF')",
-                    "executionTimeout": [
-                        "10800"
-                    ],
-                    "deliveryTimeout": [
-                        "30"
-                    ],
-                    "shell": [
-                        "Shell"
-                    ]
-                }
-            },
-            "ResultPath": null,
-            "Next": "SignDetectionLoadData"
-        },
-        "SignDetectionLoadData": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-            "Parameters": {
-                "DocumentName": "SfnRunCommandByInstanceIds",
-                "Parameters": {
-                    "InstanceIds": [
-                        "${ArratInstanceId}"
-                    ],
-                    "taskToken.$": "States.Array($$.Task.Token)",
-                    "workingDirectory": [
-                        "/home/ssm-user/"
-                    ],
-                    "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'rm -rf ~/clrnet_6625/sign_detection', 'aws s3 sync s3://i70-code-files/ARRAT_060225/sign_detection/ ~/clrnet_6625/sign_detection', 'mkdir ~/clrnet_6625/sign_detection/data', 'mkdir ~/clrnet_6625/sign_detection/data/event_images', 'EOF')",
-                    "executionTimeout": [
-                        "10800"
-                    ],
-                    "deliveryTimeout": [
-                        "30"
-                    ],
-                    "shell": [
-                        "Shell"
-                    ]
-                }
-            },
-            "ResultPath": null,
-            "Next": "ProcessSignUnits"
-        },
-        "ProcessSignUnits": {
-            "Type": "Map",
-            "InputPath": "$",
-            "MaxConcurrency": 1,
-            "ItemProcessor": {
-                "ProcessorConfig": {
-                    "Mode": "INLINE"
-                },
-                "StartAt": "SignDetectionStep1Put",
-                "States": {
-                    "SignDetectionStep1Put": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('python3 code/signs_step1_image_proc.py --datadir {} --put 1 --get 0', $.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "SignsRunSignDetection"
-                    },
-                    "SignsRunSignDetection": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/clrnet_6625/sign_detection/docker', 'make', 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "SignDetectionStep1Get"
-                    },
-                    "SignDetectionStep1Get": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('python3 code/signs_step1_image_proc.py --datadir {} --put 0 --get 1',$.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "SignDetectionStep2"
-                    },
-                    "SignDetectionStep2": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('python3 code/signs_step2_locator.py --datadir {}',$.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "End": true
-                    }
-                }
-            },
-            "Next": "SignDetectionStep3",
-            "ResultPath": null,
-            "ItemsPath": "$.units"
-        },
-        "SignDetectionStep3": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-            "Parameters": {
-                "DocumentName": "SfnRunCommandByInstanceIds",
-                "Parameters": {
-                    "InstanceIds": [
-                        "${ArratInstanceId}"
-                    ],
-                    "taskToken.$": "States.Array($$.Task.Token)",
-                    "workingDirectory": [
-                        "/home/ssm-user/"
-                    ],
-                    "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', 'python3 code/signs_step3_add_info.py --datadir ./', 'EOF')",
-                    "executionTimeout": [
-                        "10800"
-                    ],
-                    "deliveryTimeout": [
-                        "30"
-                    ],
-                    "shell": [
-                        "Shell"
-                    ]
-                }
-            },
-            "ResultPath": null,
-            "Next": "CopyUnitsToS3"
-        },
-        "CopyUnitsToS3": {
-            "Type": "Map",
-            "InputPath": "$",
-            "MaxConcurrency": 1,
-            "ItemProcessor": {
-                "ProcessorConfig": {
-                    "Mode": "INLINE"
-                },
-                "StartAt": "CopyImages",
-                "States": {
-                    "CopyImages": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('aws s3 sync {}/images/ s3://i70-session-output-data/{}/{}/images/', $.unit, $.session, $.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "Next": "CopyOutputs"
-                    },
-                    "CopyOutputs": {
-                        "Type": "Task",
-                        "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-                        "Parameters": {
-                            "DocumentName": "SfnRunCommandByInstanceIds",
-                            "Parameters": {
-                                "InstanceIds": [
-                                    "${ArratInstanceId}"
-                                ],
-                                "taskToken.$": "States.Array($$.Task.Token)",
-                                "workingDirectory": [
-                                    "/home/ssm-user/"
-                                ],
-                                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('aws s3 cp {}/gps.txt s3://i70-session-output-data/{}/{}/gps.txt', $.unit, $.session, $.unit), States.Format('aws s3 cp {}/frames.json s3://i70-session-output-data/{}/{}/frames.json', $.unit, $.session, $.unit), States.Format('aws s3 cp {}/unit_metadata.json s3://i70-session-output-data/{}/{}/unit_metadata.json', $.unit, $.session, $.unit), 'EOF')",
-                                "executionTimeout": [
-                                    "10800"
-                                ],
-                                "deliveryTimeout": [
-                                    "30"
-                                ],
-                                "shell": [
-                                    "Shell"
-                                ]
-                            }
-                        },
-                        "ResultPath": null,
-                        "End": true
-                    }
-                }
-            },
-            "Next": "CopyOutputsToS3",
-            "ResultPath": null,
-            "ItemsPath": "$.units"
-        },
-        "CopyOutputsToS3": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
-            "Parameters": {
-                "DocumentName": "SfnRunCommandByInstanceIds",
-                "Parameters": {
-                    "InstanceIds": [
-                        "${ArratInstanceId}"
-                    ],
-                    "taskToken.$": "States.Array($$.Task.Token)",
-                    "workingDirectory": [
-                        "/home/ssm-user/"
-                    ],
-                    "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/ARRAT_060225', States.Format('aws s3 cp session.geojson s3://i70-session-output-data/{}/session.geojson', $.session), States.Format('aws s3 cp inputs.json s3://i70-session-output-data/{}/inputs.json', $.session), 'EOF')",
-                    "executionTimeout": [
-                        "10800"
-                    ],
-                    "deliveryTimeout": [
-                        "30"
-                    ],
-                    "shell": [
-                        "Shell"
-                    ]
-                }
-            },
-            "ResultPath": null,
-            "Next": "CopyPipelineJSONToS3"
-        },
-        "CopyPipelineJSONToS3": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
-            "Parameters": {
-                "Bucket": "i70-session-output-data",
-                "Key.$": "States.Format('{}/pipeline_input.json', $.session)",
-                "ContentType": "application/json",
-                "Body.$": "$"
-            },
-            "End": true
+  "Comment": "lane lines and sign processing state machine",
+  "StartAt": "PrepareData",
+  "States": {
+    "PrepareData": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+      "Parameters": {
+        "DocumentName": "SfnRunCommandByInstanceIds",
+        "Parameters": {
+          "InstanceIds": [
+            "${ArratInstanceId}"
+          ],
+          "taskToken.$": "States.Array($$.Task.Token)",
+          "workingDirectory": [
+            "/home/ssm-user/"
+          ],
+          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'rm -rf arrat_scripts', 'mkdir arrat_scripts', 'cd arrat_scripts', 'mkdir code', 'aws s3 sync s3://${ArratCodeBucket}/arrat_scripts/code/ ./code', 'aws s3 cp s3://${ArratCodeBucket}/arrat_scripts/requirements.txt requirements.txt', 'cd ~/arrat_scripts', 'pip3 install -r requirements.txt', States.Format('aws s3 cp s3://${ARRATSessionInputBucket}/{}/inputs.json inputs.json', $.session), 'rm -rf ~/lanelines', 'mkdir ~/lanelines', 'mkdir ~/lanelines/clrnet', 'EOF')",
+          "executionTimeout": [
+            "10800"
+          ],
+          "deliveryTimeout": [
+            "30"
+          ],
+          "shell": [
+            "Shell"
+          ]
         }
+      },
+      "ResultPath": null,
+      "Next": "ProcessUnits"
     },
-    "TimeoutSeconds": 6000
+    "ProcessUnits": {
+      "Type": "Map",
+      "InputPath": "$",
+      "MaxConcurrency": 1,
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "LaneLinesLoadUnitData",
+        "States": {
+          "LaneLinesLoadUnitData": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd arrat_scripts', States.Format('rm -rf {}', $.unit), States.Format('mkdir {}', $.unit), States.Format('aws s3 sync s3://${ARRATSessionInputBucket}/{}/{}/ ./{}', $.session, $.unit, $.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "LaneLinesStep1"
+          },
+          "LaneLinesStep1": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step1_downsample_units.py --datadir {}', $.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "LaneLinesStep2Put"
+          },
+          "LaneLinesStep2Put": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step2_run_clrnet.py --datadir {}  --put 1 --get 0', $.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "LaneLinesRunCLRNET"
+          },
+          "LaneLinesRunCLRNET": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF','cd ~/lanelines','aws s3 cp s3://${ArratCodeBucket}/lanelines/Makefile Makefile','aws s3 cp s3://${ArratCodeBucket}/lanelines/dockerfile dockerfile', 'aws s3 sync s3://${ArratCodeBucket}/lanelines/clrnet/ ~/lanelines/clrnet', 'aws s3 cp s3://${ArratCodeBucket}/dla34.py ~/lanelines/clrnet/clrnet/models/backbones/dla34.py', 'make', 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "LaneLinesStep2Get"
+          },
+          "LaneLinesStep2Get": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step2_run_clrnet.py --datadir {} --put 0 --get 1',$.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "LaneLinesStep3"
+          },
+          "LaneLinesStep3": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts',States.Format('python3 code/step3_ego_lanelines.py --datadir {}',$.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "LaneLinesStep4"
+          },
+          "LaneLinesStep4": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step4_ego_curvature.py --datadir {}',$.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "LaneLinesStep5"
+          },
+          "LaneLinesStep5": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step5_extract_events.py --datadir {}',$.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "End": true
+          }
+        }
+      },
+      "Next": "LaneLinesStep6",
+      "ResultPath": null,
+      "ItemsPath": "$.units"
+    },
+    "LaneLinesStep6": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+      "Parameters": {
+        "DocumentName": "SfnRunCommandByInstanceIds",
+        "Parameters": {
+          "InstanceIds": [
+            "${ArratInstanceId}"
+          ],
+          "taskToken.$": "States.Array($$.Task.Token)",
+          "workingDirectory": [
+            "/home/ssm-user/"
+          ],
+          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', 'python3 code/step6_segmentation.py --datadir ./', 'EOF')",
+          "executionTimeout": [
+            "10800"
+          ],
+          "deliveryTimeout": [
+            "30"
+          ],
+          "shell": [
+            "Shell"
+          ]
+        }
+      },
+      "ResultPath": null,
+      "Next": "LaneLinesStep7"
+    },
+    "LaneLinesStep7": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+      "Parameters": {
+        "DocumentName": "SfnRunCommandByInstanceIds",
+        "Parameters": {
+          "InstanceIds": [
+            "${ArratInstanceId}"
+          ],
+          "taskToken.$": "States.Array($$.Task.Token)",
+          "workingDirectory": [
+            "/home/ssm-user/"
+          ],
+          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', 'python3 code/step7_line_scoring.py --datadir ./', 'EOF')",
+          "executionTimeout": [
+            "10800"
+          ],
+          "deliveryTimeout": [
+            "30"
+          ],
+          "shell": [
+            "Shell"
+          ]
+        }
+      },
+      "ResultPath": null,
+      "Next": "SignDetectionLoadData"
+    },
+    "SignDetectionLoadData": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+      "Parameters": {
+        "DocumentName": "SfnRunCommandByInstanceIds",
+        "Parameters": {
+          "InstanceIds": [
+            "${ArratInstanceId}"
+          ],
+          "taskToken.$": "States.Array($$.Task.Token)",
+          "workingDirectory": [
+            "/home/ssm-user/"
+          ],
+          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'rm -rf ~/sign_detection', 'aws s3 sync s3://${ArratCodeBucket}/sign_detection/ ~/sign_detection', 'mkdir ~/sign_detection/data', 'mkdir ~/sign_detection/data/event_images', 'EOF')",
+          "executionTimeout": [
+            "10800"
+          ],
+          "deliveryTimeout": [
+            "30"
+          ],
+          "shell": [
+            "Shell"
+          ]
+        }
+      },
+      "ResultPath": null,
+      "Next": "ProcessSignUnits"
+    },
+    "ProcessSignUnits": {
+      "Type": "Map",
+      "InputPath": "$",
+      "MaxConcurrency": 1,
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "SignDetectionStep1Put",
+        "States": {
+          "SignDetectionStep1Put": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step1_image_proc.py --datadir {} --put 1 --get 0', $.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "SignsRunSignDetection"
+          },
+          "SignsRunSignDetection": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/sign_detection/docker', 'make', 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "SignDetectionStep1Get"
+          },
+          "SignDetectionStep1Get": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step1_image_proc.py --datadir {} --put 0 --get 1',$.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "SignDetectionStep2"
+          },
+          "SignDetectionStep2": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step2_locator.py --datadir {}',$.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "End": true
+          }
+        }
+      },
+      "Next": "SignDetectionStep3",
+      "ResultPath": null,
+      "ItemsPath": "$.units"
+    },
+    "SignDetectionStep3": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+      "Parameters": {
+        "DocumentName": "SfnRunCommandByInstanceIds",
+        "Parameters": {
+          "InstanceIds": [
+            "${ArratInstanceId}"
+          ],
+          "taskToken.$": "States.Array($$.Task.Token)",
+          "workingDirectory": [
+            "/home/ssm-user/"
+          ],
+          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', 'python3 code/signs_step3_add_info.py --datadir ./', 'EOF')",
+          "executionTimeout": [
+            "10800"
+          ],
+          "deliveryTimeout": [
+            "30"
+          ],
+          "shell": [
+            "Shell"
+          ]
+        }
+      },
+      "ResultPath": null,
+      "Next": "CopyUnitsToS3"
+    },
+    "CopyUnitsToS3": {
+      "Type": "Map",
+      "InputPath": "$",
+      "MaxConcurrency": 1,
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "CopyImages",
+        "States": {
+          "CopyImages": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 sync {}/images/ s3://${ARRATSessionOutputBucket}/{}/{}/images/', $.unit, $.session, $.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "Next": "CopyOutputs"
+          },
+          "CopyOutputs": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+            "Parameters": {
+              "DocumentName": "SfnRunCommandByInstanceIds",
+              "Parameters": {
+                "InstanceIds": [
+                  "${ArratInstanceId}"
+                ],
+                "taskToken.$": "States.Array($$.Task.Token)",
+                "workingDirectory": [
+                  "/home/ssm-user/"
+                ],
+                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 cp {}/gps.txt s3://${ARRATSessionOutputBucket}/{}/{}/gps.txt', $.unit, $.session, $.unit), States.Format('aws s3 cp {}/frames.json s3://${ARRATSessionOutputBucket}/{}/{}/frames.json', $.unit, $.session, $.unit), States.Format('aws s3 cp {}/unit_metadata.json s3://${ARRATSessionOutputBucket}/{}/{}/unit_metadata.json', $.unit, $.session, $.unit), 'EOF')",
+                "executionTimeout": [
+                  "10800"
+                ],
+                "deliveryTimeout": [
+                  "30"
+                ],
+                "shell": [
+                  "Shell"
+                ]
+              }
+            },
+            "ResultPath": null,
+            "End": true
+          }
+        }
+      },
+      "Next": "CopyOutputsToS3",
+      "ResultPath": null,
+      "ItemsPath": "$.units"
+    },
+    "CopyOutputsToS3": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+      "Parameters": {
+        "DocumentName": "SfnRunCommandByInstanceIds",
+        "Parameters": {
+          "InstanceIds": [
+            "${ArratInstanceId}"
+          ],
+          "taskToken.$": "States.Array($$.Task.Token)",
+          "workingDirectory": [
+            "/home/ssm-user/"
+          ],
+          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 cp session.geojson s3://${ARRATSessionOutputBucket}/{}/session.geojson', $.session), States.Format('aws s3 cp inputs.json s3://${ARRATSessionOutputBucket}/{}/inputs.json', $.session), 'EOF')",
+          "executionTimeout": [
+            "10800"
+          ],
+          "deliveryTimeout": [
+            "30"
+          ],
+          "shell": [
+            "Shell"
+          ]
+        }
+      },
+      "ResultPath": null,
+      "Next": "CopyPipelineJSONToS3"
+    },
+    "CopyPipelineJSONToS3": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
+      "Parameters": {
+        "Bucket": "${ARRATSessionOutputBucket}",
+        "Key.$": "States.Format('{}/pipeline_input.json', $.session)",
+        "ContentType": "application/json",
+        "Body.$": "$"
+      },
+      "Next": "CleanupData"
+    },
+    "CleanupData": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:ssm:startAutomationExecution.waitForTaskToken",
+      "Parameters": {
+        "DocumentName": "SfnRunCommandByInstanceIds",
+        "Parameters": {
+          "InstanceIds": [
+            "${ArratInstanceId}"
+          ],
+          "taskToken.$": "States.Array($$.Task.Token)",
+          "workingDirectory": [
+            "/home/ssm-user/"
+          ],
+          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'rm -rf ~/arrat_scripts', 'rm -rf ~/lanelines', 'rm -rf ~/sign_detection', 'EOF')",
+          "executionTimeout": [
+            "10800"
+          ],
+          "deliveryTimeout": [
+            "30"
+          ],
+          "shell": [
+            "Shell"
+          ]
+        }
+      },
+      "ResultPath": null,
+      "End": true
+    }
+  },
+  "TimeoutSeconds": 6000
 }
