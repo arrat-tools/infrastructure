@@ -15,7 +15,7 @@
           "workingDirectory": [
             "/home/ssm-user/"
           ],
-          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'rm -rf arrat_scripts', 'mkdir arrat_scripts', 'cd arrat_scripts', 'mkdir code', 'aws s3 sync s3://${ArratCodeBucket}/arrat_scripts/code/ ./code', 'aws s3 cp s3://${ArratCodeBucket}/arrat_scripts/requirements.txt requirements.txt', 'cd ~/arrat_scripts', 'pip3 install -r requirements.txt', States.Format('aws s3 cp s3://${ARRATSessionInputBucket}/{}/inputs.json inputs.json', $.session), 'rm -rf ~/lanelines', 'mkdir ~/lanelines', 'mkdir ~/lanelines/clrnet', 'EOF')",
+          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'rm -rf arrat_scripts', 'mkdir arrat_scripts', 'cd arrat_scripts', 'mkdir code', 'aws s3 sync s3://${ArratCodeBucket}/arrat_scripts/code/ ./code', 'aws s3 cp s3://${ArratCodeBucket}/arrat_scripts/requirements.txt requirements.txt', 'cd ~/arrat_scripts', 'pip3 install -r requirements.txt', States.Format('aws s3 cp s3://${ARRATSessionInputBucket}/{}/inputs.json inputs.json', $.session), 'rm -rf ~/lanelines', 'mkdir ~/lanelines', 'mkdir ~/lanelines/clrnet', 'EOF')",
           "executionTimeout": [
             "10800"
           ],
@@ -53,7 +53,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd arrat_scripts', States.Format('rm -rf {}', $.unit), States.Format('mkdir {}', $.unit), States.Format('aws s3 sync s3://${ARRATSessionInputBucket}/{}/{}/ ./{}', $.session, $.unit, $.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd arrat_scripts', States.Format('rm -rf {}', $.unit), States.Format('mkdir {}', $.unit), States.Format('aws s3 sync s3://${ARRATSessionInputBucket}/{}/{}/ ./{}', $.session, $.unit, $.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -81,7 +81,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step1_downsample_units.py --datadir {}', $.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step1_downsample_units.py --datadir {}', $.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -109,7 +109,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step2_run_clrnet.py --datadir {}  --put 1 --get 0', $.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step2_run_clrnet.py --datadir {}  --put 1 --get 0', $.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -137,7 +137,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF','cd ~/lanelines','aws s3 cp s3://${ArratCodeBucket}/lanelines/Makefile Makefile','aws s3 cp s3://${ArratCodeBucket}/lanelines/dockerfile dockerfile', 'aws s3 sync s3://${ArratCodeBucket}/lanelines/clrnet/ ~/lanelines/clrnet', 'aws s3 cp s3://${ArratCodeBucket}/dla34.py ~/lanelines/clrnet/clrnet/models/backbones/dla34.py', 'make', 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF','cd ~/lanelines','aws s3 cp s3://${ArratCodeBucket}/lanelines/Makefile Makefile','aws s3 cp s3://${ArratCodeBucket}/lanelines/dockerfile dockerfile', 'aws s3 sync s3://${ArratCodeBucket}/lanelines/clrnet/ ~/lanelines/clrnet', 'aws s3 cp s3://${ArratCodeBucket}/dla34.py ~/lanelines/clrnet/clrnet/models/backbones/dla34.py', 'make', 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -165,7 +165,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step2_run_clrnet.py --datadir {} --put 0 --get 1',$.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step2_run_clrnet.py --datadir {} --put 0 --get 1',$.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -193,7 +193,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts',States.Format('python3 code/step3_ego_lanelines.py --datadir {}',$.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts',States.Format('python3 code/step3_ego_lanelines.py --datadir {}',$.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -221,7 +221,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step4_ego_curvature.py --datadir {}',$.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step4_ego_curvature.py --datadir {}',$.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -249,7 +249,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step5_extract_events.py --datadir {}',$.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/step5_extract_events.py --datadir {}',$.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -283,7 +283,7 @@
           "workingDirectory": [
             "/home/ssm-user/"
           ],
-          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', 'python3 code/step6_segmentation.py --datadir ./', 'EOF')",
+          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', 'python3 code/step6_segmentation.py --datadir ./', 'EOF')",
           "executionTimeout": [
             "10800"
           ],
@@ -311,7 +311,7 @@
           "workingDirectory": [
             "/home/ssm-user/"
           ],
-          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', 'python3 code/step7_line_scoring.py --datadir ./', 'EOF')",
+          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', 'python3 code/step7_line_scoring.py --datadir ./', 'EOF')",
           "executionTimeout": [
             "10800"
           ],
@@ -339,7 +339,7 @@
           "workingDirectory": [
             "/home/ssm-user/"
           ],
-          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'rm -rf ~/sign_detection', 'aws s3 sync s3://${ArratCodeBucket}/sign_detection/ ~/sign_detection', 'mkdir ~/sign_detection/data', 'mkdir ~/sign_detection/data/event_images', 'EOF')",
+          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'rm -rf ~/sign_detection', 'aws s3 sync s3://${ArratCodeBucket}/sign_detection/ ~/sign_detection', 'mkdir ~/sign_detection/data', 'mkdir ~/sign_detection/data/event_images', 'EOF')",
           "executionTimeout": [
             "10800"
           ],
@@ -377,7 +377,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step1_image_proc.py --datadir {} --put 1 --get 0', $.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step1_image_proc.py --datadir {} --put 1 --get 0', $.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -405,7 +405,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/sign_detection/docker', 'make', 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/sign_detection/docker', 'make', 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -433,7 +433,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step1_image_proc.py --datadir {} --put 0 --get 1',$.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step1_image_proc.py --datadir {} --put 0 --get 1',$.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -461,7 +461,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step2_locator.py --datadir {}',$.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('python3 code/signs_step2_locator.py --datadir {}',$.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -495,7 +495,7 @@
           "workingDirectory": [
             "/home/ssm-user/"
           ],
-          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', 'python3 code/signs_step3_add_info.py --datadir ./', 'EOF')",
+          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', 'python3 code/signs_step3_add_info.py --datadir ./', 'EOF')",
           "executionTimeout": [
             "10800"
           ],
@@ -533,7 +533,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 sync {}/images/ s3://${ARRATSessionOutputBucket}/{}/{}/images/', $.unit, $.session, $.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 sync {}/images/ s3://${ARRATSessionOutputBucket}/{}/{}/images/', $.unit, $.session, $.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -561,7 +561,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 cp {}/gps.txt s3://${ARRATSessionOutputBucket}/{}/{}/gps.txt', $.unit, $.session, $.unit), States.Format('aws s3 cp {}/frames.json s3://${ARRATSessionOutputBucket}/{}/{}/frames.json', $.unit, $.session, $.unit), States.Format('aws s3 cp {}/unit_metadata.json s3://${ARRATSessionOutputBucket}/{}/{}/unit_metadata.json', $.unit, $.session, $.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 cp {}/gps.txt s3://${ARRATSessionOutputBucket}/{}/{}/gps.txt', $.unit, $.session, $.unit), States.Format('aws s3 cp {}/frames.json s3://${ARRATSessionOutputBucket}/{}/{}/frames.json', $.unit, $.session, $.unit), States.Format('aws s3 cp {}/unit_metadata.json s3://${ARRATSessionOutputBucket}/{}/{}/unit_metadata.json', $.unit, $.session, $.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
@@ -595,7 +595,7 @@
           "workingDirectory": [
             "/home/ssm-user/"
           ],
-          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 cp session.geojson s3://${ARRATSessionOutputBucket}/{}/session.geojson', $.session), States.Format('aws s3 cp inputs.json s3://${ARRATSessionOutputBucket}/{}/inputs.json', $.session), 'EOF')",
+          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('aws s3 cp session.geojson s3://${ARRATSessionOutputBucket}/{}/session.geojson', $.session), States.Format('aws s3 cp inputs.json s3://${ARRATSessionOutputBucket}/{}/inputs.json', $.session), 'EOF')",
           "executionTimeout": [
             "10800"
           ],
@@ -634,7 +634,7 @@
           "workingDirectory": [
             "/home/ssm-user/"
           ],
-          "Commands.$": "States.Array('sudo -i -u bscholer << EOF', 'rm -rf ~/arrat_scripts', 'rm -rf ~/lanelines', 'rm -rf ~/sign_detection', 'EOF')",
+          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'rm -rf ~/arrat_scripts', 'rm -rf ~/lanelines', 'rm -rf ~/sign_detection', 'EOF')",
           "executionTimeout": [
             "10800"
           ],
