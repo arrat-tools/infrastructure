@@ -63,7 +63,8 @@ Resources:
           apt-get purge --auto-remove python3-pip
           apt-get update
           apt-get -y install python3-pip
-          chsh -s /bin/bash bscholer
+          useradd -m arrat
+          mkhomedir_helper arrat
 
   InstanceProfile: 
     Type: AWS::IAM::InstanceProfile 
@@ -71,3 +72,21 @@ Resources:
       Path: "/"
       Roles: 
         - !Ref InstanceRole
+
+  # InstallSSMAgentAssociation:
+  #   Type: AWS::SSM::Association
+  #   Properties:
+  #     Name: AWS-ConfigureAWSPackage
+  #     Targets:
+  #       - Key: tag:Environment
+  #         Values:
+  #           - Production
+  #     Parameters:
+  #       action:
+  #         - Install
+  #       source:
+  #         - https://s3.amazonaws.com/amazon-ssm-us-east-1/ssm-agent/
+  #       packageName:
+  #         - AmazonSSMAgent
+  #     ScheduleExpression: cron(0 0 ? * * *) # Run daily
+
