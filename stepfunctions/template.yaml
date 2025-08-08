@@ -10,7 +10,13 @@ Parameters:
     
 Resources: 
 
-  ARRATBucket:
+  ARRATCodeBucket:
+    Type: AWS::S3::Bucket
+
+  ARRATSessionInputBucket:
+    Type: AWS::S3::Bucket
+
+  ARRATSessionOutputBucket:
     Type: AWS::S3::Bucket
 
   ARRATStateMachine: 
@@ -19,6 +25,9 @@ Resources:
       DefinitionUri: ../statemachine/arrat.asl.json 
       DefinitionSubstitutions:
         ArratInstanceId: !Ref InstanceId
+        ArratCodeBucket: !Ref ARRATCodeBucket
+        ARRATSessionInputBucket: !Ref ARRATSessionInputBucket
+        ARRATSessionOutputBucket: !Ref ARRATSessionOutputBucket
       Role: !Ref SSMStepFunctionRole
 
   SSMStepFunctionRole:
@@ -50,9 +59,21 @@ Resources:
         - Statement:
           - Effect: Allow
             Action:
+            - 's3:GetObject'
+            Resource:
+            - !GetAtt ARRATCodeBucket.Arn
+        - Statement:
+          - Effect: Allow
+            Action:
+            - 's3:GetObject'
+            Resource:
+            - !GetAtt ARRATSessionInputBucket.Arn
+        - Statement:
+          - Effect: Allow
+            Action:
             - 's3:PutObject'
             Resource:
-            - !GetAtt ARRATBucket.Arn
+            - !GetAtt ARRATSessionOutputBucket.Arn
       RoleName: SSMStepFunctionRole      
 
 Outputs: 
