@@ -72,7 +72,8 @@ Resources:
               Action:
               - 's3:PutObject'
               Resource:
-              - !GetAtt ARRATSessionOutputBucket.Arn
+              - !Sub "arn:aws:s3:::${ARRATSessionOutputBucket}/*"
+
       RoleName: SSMStepFunctionRole      
 
 Outputs: 
