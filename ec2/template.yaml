@@ -65,7 +65,7 @@ Resources:
           apt-get -y install python3-pip
           useradd -m arrat
           mkhomedir_helper arrat
-          usermod -aG docker arrat
+          usermod -aG docker arrat 
 
   InstanceProfile: 
     Type: AWS::IAM::InstanceProfile 
@@ -90,5 +90,4 @@ Resources:
   #       packageName:
   #         - AmazonSSMAgent
   #     ScheduleExpression: cron(0 0 ? * * *) # Run daily
-
 
