@@ -6,7 +6,7 @@ Parameters:
   InstanceId: 
     Type: String 
     Description: ARRAT GPU instance
-    Default: i-0b0b76f95e728f27f 
+    Default: i-0c8e82483c8d41a38 
     
 Resources: 
 
@@ -28,7 +28,7 @@ Resources:
         ArratCodeBucket: !Ref ARRATCodeBucket
         ARRATSessionInputBucket: !Ref ARRATSessionInputBucket
         ARRATSessionOutputBucket: !Ref ARRATSessionOutputBucket
-      Role: !Ref SSMStepFunctionRole
+      Role: !GetAtt SSMStepFunctionRole.Arn
 
   SSMStepFunctionRole:
     Type: AWS::IAM::Role
@@ -41,39 +41,38 @@ Resources:
               Service: states.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - Statement:
-          - Effect: Allow
-            Action:
-            - 'xray:PutTraceSegments'
-            - 'xray:PutTelemetryRecords'
-            - 'xray:GetSamplingRules'
-            - 'xray:GetSamplingTargets'
-            Resource:
-            - '*'
-        - Statement:
-          - Effect: Allow
-            Action:
-            - 'ssm:StartAutomationExecution'
-            Resource:
-            - '*'
-        - Statement:
-          - Effect: Allow
-            Action:
-            - 's3:GetObject'
-            Resource:
-            - !GetAtt ARRATCodeBucket.Arn
-        - Statement:
-          - Effect: Allow
-            Action:
-            - 's3:GetObject'
-            Resource:
-            - !GetAtt ARRATSessionInputBucket.Arn
-        - Statement:
-          - Effect: Allow
-            Action:
-            - 's3:PutObject'
-            Resource:
-            - !GetAtt ARRATSessionOutputBucket.Arn
+        - PolicyName: stepfunctionsxraypolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - 'xray:PutTraceSegments'
+              - 'xray:PutTelemetryRecords'
+              - 'xray:GetSamplingRules'
+              - 'xray:GetSamplingTargets'
+              Resource:
+              - '*'
+            - Effect: Allow
+              Action:
+              - 'ssm:StartAutomationExecution'
+              Resource:
+              - '*'
+            - Effect: Allow
+              Action:
+              - 's3:GetObject'
+              Resource:
+              - !GetAtt ARRATCodeBucket.Arn
+            - Effect: Allow
+              Action:
+              - 's3:GetObject'
+              Resource:
+              - !GetAtt ARRATSessionInputBucket.Arn
+            - Effect: Allow
+              Action:
+              - 's3:PutObject'
+              Resource:
+              - !GetAtt ARRATSessionOutputBucket.Arn
       RoleName: SSMStepFunctionRole      
 
 Outputs: 
