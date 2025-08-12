@@ -62,12 +62,12 @@ Resources:
               Action:
               - 's3:GetObject'
               Resource:
-              - !GetAtt ARRATCodeBucket.Arn
+              - !Sub "arn:aws:s3:::${ARRATCodeBucket}/*"
             - Effect: Allow
               Action:
               - 's3:GetObject'
               Resource:
-              - !GetAtt ARRATSessionInputBucket.Arn
+              - !Sub "arn:aws:s3:::${ARRATSessionInputBucket}/*"
             - Effect: Allow
               Action:
               - 's3:PutObject'
