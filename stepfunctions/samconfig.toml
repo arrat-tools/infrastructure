@@ -1,0 +1,10 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "arratstepfunction"
+resolve_s3 = true
+s3_prefix = "arratstepfunction"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+parameter_overrides = "InstanceId=\"i-0c8e82483c8d41a38\""
+image_repositories = []
