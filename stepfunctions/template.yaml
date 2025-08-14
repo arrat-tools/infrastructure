@@ -79,5 +79,17 @@ Resources:
 Outputs: 
 
   ARRATStateMachineArn: 
-    Description: ARRAT state machine 
+    Description: ARN of the ARRAT Step Function state machine
     Value: !Ref ARRATStateMachine
+
+  SessionInputBucketName:
+    Description: Name of the S3 bucket for ARRAT session input data
+    Value: !Ref ARRATSessionInputBucket
+
+  SessionOutputBucketName:
+    Description: Name of the S3 bucket for ARRAT session output data
+    Value: !Ref ARRATSessionOutputBucket
+
+  ARRATStateMachineName:
+    Description: Name of the ARRAT Step Function state machine
+    Value: !GetAtt ARRATStateMachine.Name
