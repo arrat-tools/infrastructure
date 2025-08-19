@@ -145,6 +145,7 @@ _If needed, update `arrat-cli` to the profile configured during the prerequisite
 > \[!NOTE]
 > 
 > Remember to keep the `SessionInputBucketName`, `SessionOutputBucketName`, and `ARRATStateMachineName` Outputs from the CloudFormation Stack ready since this will be used when deploying the API.
+> Also save the `CloudFrontDomain` Output since this will be used when deploying the frontend.
 
 ### Option 2: Deploy using AWS Console
 
@@ -164,6 +165,7 @@ _If needed, update `arrat-cli` to the profile configured during the prerequisite
 > \[!NOTE]
 > 
 > Remember to keep the `SessionInputBucketName`, `SessionOutputBucketName`, and `ARRATStateMachineName` Outputs from the CloudFormation Stack ready since this will be used when deploying the API.
+> Also save the `CloudFrontDomain` Output since this will be used when deploying the frontend.
 
 [![][back-to-top]](#readme-top)
 
