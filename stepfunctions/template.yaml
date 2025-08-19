@@ -76,6 +76,52 @@ Resources:
 
       RoleName: SSMStepFunctionRole      
 
+  FrontendBucketOACPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ARRATSessionOutputBucket
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub ${ARRATSessionOutputBucket.Arn}/*
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: CloudFrontOAC
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        Description: OAC for S3 bucket
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        DefaultCacheBehavior:
+          TargetOriginId: !GetAtt ARRATSessionOutputBucket.Arn
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized PolicyId
+        Enabled: true
+        Origins:
+          - DomainName: !GetAtt ARRATSessionOutputBucket.RegionalDomainName
+            Id: !GetAtt ARRATSessionOutputBucket.Arn
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        PriceClass: PriceClass_100
+        HttpVersion: http2
+
 Outputs: 
 
   ARRATStateMachineArn: 
@@ -93,3 +139,7 @@ Outputs:
   ARRATStateMachineName:
     Description: Name of the ARRAT Step Function state machine
     Value: !GetAtt ARRATStateMachine.Name
+
+  CloudFrontDomain:
+    Description: Output CloudFront Distribution
+    Value: !GetAtt CloudFrontDistribution.DomainName
