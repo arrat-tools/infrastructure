@@ -122,6 +122,45 @@ Resources:
         PriceClass: PriceClass_100
         HttpVersion: http2
 
+  ArratOperator:
+    Type: AWS::IAM::User
+    Properties:
+      Path: /arratoperator/
+      UserName: ArratOperator
+      Policies:
+        - PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - 's3:PutObject'
+              - 's3:GetObject'
+              Resource:
+              - !Sub "arn:aws:s3:::${ARRATSessionInputBucket}/*"
+            - Effect: Allow
+              Action:
+              - 's3:ListBucket'
+              Resource:
+              - !Sub "arn:aws:s3:::${ARRATSessionInputBucket}/*"
+            - Effect: Allow
+              Action:
+              - 's3:ListAllMyBuckets'
+              Resource:
+              - '*'
+          PolicyName: s3-arrat-operator-policy
+
+  ArratOperatorIAMCredentials:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      Status: Active
+      UserName: !Ref ArratOperator
+
+  ArratOperatorCredentialsSecretsManager:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub /arratoperator/credentials/${ArratOperator}
+      SecretString: !Sub '{"ACCESS_KEY":"${ArratOperatorIAMCredentials}","SECRET_KEY":"${ArratOperatorIAMCredentials.SecretAccessKey}"}'
+
 Outputs: 
 
   ARRATStateMachineArn: 
