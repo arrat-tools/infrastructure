@@ -167,6 +167,12 @@ _If needed, update `arrat-cli` to the profile configured during the prerequisite
 > Remember to keep the `SessionInputBucketName`, `SessionOutputBucketName`, and `ARRATStateMachineName` Outputs from the CloudFormation Stack ready since this will be used when deploying the API.
 > Also save the `CloudFrontDomain` Output since this will be used when deploying the frontend.
 
+### Retrieving Operator Credentials for uploading files to S3
+
+After the CloudFormation templates have been successfully deployed, the vehicle operator can begin uploading the files to S3 that will be processed by the pipeline.  S3 credentials created by the template are securely stored in AWS Secrets Manager.  In order to retrieve these credentials, an Administrator for your AWS account will need to share the Access Key and Secret Access Key that has been stored in Secrets Manager.  
+
+To retreive these keys, the administrator should navigate to AWS Secrets Manager, Secrets, and go to the /arratoperator/credentials/ArratOperator secret.  Select the secret and click Retrieve secret value.  The ACCESS_KEY and SECRET_KEY values should be shared with the vehicle operator.  
+
 [![][back-to-top]](#readme-top)
 
 <!-- Link Groups -->
