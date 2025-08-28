@@ -1,0 +1,21 @@
+FROM sinakim/clrnet:3.2
+
+WORKDIR /clrnet
+
+RUN pip install opencv-python==4.8.0.74
+
+RUN apt update && \
+    apt install ffmpeg libsm6 libxext6 git ninja-build libglib2.0-0 libxrender-dev -y && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY ./clrnet/requirements.txt .
+
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+COPY ./clrnet .
+
+RUN chmod u+x call_clrnet.sh 
+
+RUN python setup.py build develop

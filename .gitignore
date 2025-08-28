@@ -1,0 +1,5 @@
+# PyTorch models - These will be included in the github release (https://github.com/arrat-tools/infrastructure/releases)
+/**/*.pth
+
+# Release .zip and .tar.gz files containing pretrained models
+/release_artifacts
