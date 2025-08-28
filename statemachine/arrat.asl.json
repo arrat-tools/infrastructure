@@ -53,7 +53,7 @@
                 "workingDirectory": [
                   "/home/ssm-user/"
                 ],
-                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd arrat_scripts', States.Format('rm -rf {}', $.unit), States.Format('mkdir {}', $.unit), States.Format('aws s3 sync s3://${ARRATSessionInputBucket}/{}/{}/ ./{}', $.session, $.unit, $.unit), 'EOF')",
+                "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~/arrat_scripts', States.Format('rm -rf {}', $.unit), States.Format('mkdir {}', $.unit), States.Format('aws s3 sync s3://${ARRATSessionInputBucket}/{}/{}/ ./{}', $.session, $.unit, $.unit), 'EOF')",
                 "executionTimeout": [
                   "10800"
                 ],
