@@ -70,14 +70,27 @@ Using the IDs from the services set up above, this guide provides the steps for 
 >
 > If you are unfamiliar with the installation process of the AWS CLI, you can get started with the prerequisites by following the steps [here][back-to-prerequisites]
 
-1: Clone the repository. _Before starting the deployment, clone the [ARRAT Infrastructure repository](https://github.com/arrat-tools/infrastructure) to your local machine._
+1: Download and extract the release code. _Before starting the deployment, download the latest [ARRAT Infrastructure repository code](https://github.com/arrat-tools/infrastructure/releases) to your local machine._
+
+_The release code includes all needed templates, infrastructure code, and pre-trained PyTorch models that are not included in the repository._
 
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="/assets/readme/deploy-infra-clone-repo.png">
-    <img height="240" src="/assets/readme/deploy-infra-clone-repo.png" alt="Clone ARRAT Infrastructure repository">
+    <source media="(prefers-color-scheme: dark)" srcset="/assets/readme/deploy-infra-download-release-code.png">
+    <img height="240" src="/assets/readme/deploy-infra-download-release-code.png" alt="Clone ARRAT Infrastructure repository">
   </picture>
 </div>
+
+Use your system's built in system to extract the files from the .zip or the .tar.gz file. If you are running this through the CLI, run the following command:
+
+_For extracting zip_
+```
+unzip ./release-v1.0.0.zip
+```
+_For extracting tar_
+```
+tar -xvzf ./release-v1.0.0.tar.gz
+```
 
 2: From the command line, navigate to the ec2 directory.
 
@@ -126,7 +139,7 @@ After the EC2 stack is deployed and the instance is created, the pipeline step f
 >
 > If you are unfamiliar with the installation process of the AWS CLI, you can get started with the prerequisites by following the steps [here][back-to-prerequisites]
 
-1: Clone the repository. This step should already be done if you deployed the EC2 instance through the cli.
+1: Download and extract the release code. This step should already be done if you deployed the EC2 instance through the cli.
 
 2: From the command line, navigate to the stepfunctions directory.
 
