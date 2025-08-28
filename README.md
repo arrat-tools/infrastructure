@@ -187,6 +187,24 @@ After the CloudFormation templates have been successfully deployed, the vehicle 
 
 To retreive these keys, the administrator should navigate to AWS Secrets Manager, Secrets, and go to the /arratoperator/credentials/ArratOperator secret.  Select the secret and click Retrieve secret value.  The ACCESS_KEY and SECRET_KEY values should be shared with the vehicle operator.  
 
+## (Optional) Creating your own release
+
+Once changes are made to the source code and you may want to upload them as a new release on Github. To do this, create release artifacts for the template and the infrastructure code. Once created, create a new release using the Github site and attach your `release_artifacts/`
+
+To generate the zip file you can run:
+
+```
+zip -r ./release_artifacts/release-v1.0.0.zip ./assets/ ./ec2/ ./statemachine/ ./stepfunctions/ ./arrat-infrastructure-code/ ./README.md ./.gitignore
+```
+
+To generate the tar.gz file you can run:
+
+```
+tar -czf ./release_artifacts/release-v1.0.0.tar.gz ./assets/ ./ec2/ ./statemachine/ ./stepfunctions/ ./arrat-infrastructure-code/ ./README.md ./.gitignore
+```
+
+_If needed, update `release-v1.0.0` to your current release_
+
 [![][back-to-top]](#readme-top)
 
 <!-- Link Groups -->
