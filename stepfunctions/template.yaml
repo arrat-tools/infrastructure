@@ -167,6 +167,14 @@ Outputs:
     Description: ARN of the ARRAT Step Function state machine
     Value: !Ref ARRATStateMachine
 
+  ARRATInfrastructureCodeBucketName:
+    Description: Name of the S3 bucket for ARRAT infrastructure code
+    Value: !Ref ARRATCodeBucket
+
+  ARRATInfrastructureCodeS3Uri:
+    Description: The S3 URI for the ARRAT infrastructure code bucket.
+    Value: !Sub "s3://${ARRATCodeBucket}"
+
   SessionInputBucketName:
     Description: Name of the S3 bucket for ARRAT session input data
     Value: !Ref ARRATSessionInputBucket

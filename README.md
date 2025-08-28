@@ -144,7 +144,8 @@ _If needed, update `arrat-cli` to the profile configured during the prerequisite
 
 > \[!NOTE]
 > 
-> Remember to keep the `SessionInputBucketName`, `SessionOutputBucketName`, and `ARRATStateMachineName` Outputs from the CloudFormation Stack ready since this will be used when deploying the API.
+> Remember to keep the `SessionOutputBucketName` Output from the CloudFormation Stack ready since this will be used when uploading ARRAT infrastructure code in the next step.
+> Also save the `SessionInputBucketName`, `SessionOutputBucketName`, and `ARRATStateMachineName` Outputs from the CloudFormation Stack ready since this will be used when deploying the API.
 > Also save the `CloudFrontDomain` Output since this will be used when deploying the frontend.
 
 ### Option 2: Deploy using AWS Console
@@ -164,10 +165,23 @@ _If needed, update `arrat-cli` to the profile configured during the prerequisite
 
 > \[!NOTE]
 > 
-> Remember to keep the `SessionInputBucketName`, `SessionOutputBucketName`, and `ARRATStateMachineName` Outputs from the CloudFormation Stack ready since this will be used when deploying the API.
+> Remember to keep the `ARRATInfrastructureCodeS3Uri` Output from the CloudFormation Stack ready since this will be used when uploading ARRAT infrastructure code in the next step.
+> Also save the `SessionInputBucketName`, `SessionOutputBucketName`, and `ARRATStateMachineName` Outputs from the CloudFormation Stack ready since this will be used when deploying the API.
 > Also save the `CloudFrontDomain` Output since this will be used when deploying the frontend.
 
-### Retrieving Operator Credentials for uploading files to S3
+## Uploading ARRAT Infrastructure Code
+
+With the `ARRATInfrastructureCodeS3Uri` Output from the previous step, we will now upload the contents from the `arrat-infrastructure-code/` directory. This code will be used by the step function to process images and generate session outputs.
+
+We can upload these files through the AWS S3 Web Console or using the AWS CLI with the following command:
+
+```
+aws s3 cp "./arrat-infrastructure-code" "<value of ARRATInfrastructureCodeS3Uri>" --recursive --profile=arrat-cli
+```
+
+_If needed, update `arrat-cli` to the profile configured during the prerequisites step_
+
+## Retrieving Operator Credentials for uploading files to S3
 
 After the CloudFormation templates have been successfully deployed, the vehicle operator can begin uploading the files to S3 that will be processed by the pipeline.  S3 credentials created by the template are securely stored in AWS Secrets Manager.  In order to retrieve these credentials, an Administrator for your AWS account will need to share the Access Key and Secret Access Key that has been stored in Secrets Manager.  
 
