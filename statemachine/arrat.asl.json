@@ -15,7 +15,7 @@
           "workingDirectory": [
             "/home/ssm-user/"
           ],
-          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'rm -rf arrat_scripts', 'mkdir arrat_scripts', 'cd ~/arrat_scripts', 'mkdir code', 'aws s3 sync s3://${ArratCodeBucket}/arrat_scripts/code/ ./code', 'aws s3 cp s3://${ArratCodeBucket}/arrat_scripts/requirements.txt requirements.txt', 'cd ~/arrat_scripts', 'pip3 install -r requirements.txt', States.Format('aws s3 cp s3://${ARRATSessionInputBucket}/{}/inputs.json inputs.json', $.session), 'rm -rf ~/lanelines', 'mkdir ~/lanelines', 'mkdir ~/lanelines/clrnet', 'EOF')",
+          "Commands.$": "States.Array('sudo -i -u arrat << EOF', 'cd ~', 'rm -rf arrat_scripts', 'mkdir arrat_scripts', 'cd arrat_scripts', 'mkdir code', 'aws s3 sync s3://${ArratCodeBucket}/arrat_scripts/code/ ./code', 'aws s3 cp s3://${ArratCodeBucket}/arrat_scripts/requirements.txt requirements.txt', 'pip3 install -r requirements.txt', States.Format('aws s3 cp s3://${ARRATSessionInputBucket}/{}/inputs.json inputs.json', $.session), 'rm -rf ~/lanelines', 'mkdir ~/lanelines', 'mkdir ~/lanelines/clrnet', 'EOF')",
           "executionTimeout": [
             "10800"
           ],
